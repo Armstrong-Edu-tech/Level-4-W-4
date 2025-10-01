@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Express API Tester</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+  <div id="app">
+    <h2>API Tester</h2>
+
+    <h3>GET /users</h3>
+    <button @click="fetchUsers">Fetch Users</button>
+    <ul>
+      <li v-for="(user, index) in users" :key="index">
+        {{ index }} - {{ user.name }} ({{ user.email }})
+      </li>
+    </ul>
+
+    <hr />
+
+    <h3>POST /users</h3>
+    <input v-model="newUser.name" placeholder="Name" />
+    <input v-model="newUser.email" placeholder="Email" />
+    <button @click="addUser">Add User</button>
+
+    <hr />
+
+    <h3>PUT /users/:id</h3>
+    <input v-model.number="editIndex" placeholder="User Index" />
+    <input v-model="editUser.name" placeholder="New Name" />
+    <input v-model="editUser.email" placeholder="New Email" />
+    <button @click="updateUser">Update User</button>
+
+    <hr />
+
+    <h3>DELETE /users/:id</h3>
+    <input v-model.number="deleteIndex" placeholder="User Index to Delete" />
+    <button @click="deleteUser">Delete User</button>
+
+    <hr />
+
+    <p v-if="message">{{ message }}</p>
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          users: [],
+          newUser: { name: '', email: '' },
+          editUser: { name: '', email: '' },
+          editIndex: null,
+          deleteIndex: null,
+          message: ''
+        };
+      },
+      methods: {
+        async fetchUsers() {
+          try {
+            const res = await fetch('http://localhost:3000/users');
+            const data = await res.json();
+            this.users = data.users;
+            this.message = '';
+          } catch (err) {
+            this.message = 'Error fetching users';
+          }
+        },
+        async addUser() {
+          try {
+            const res = await fetch('http://localhost:3000/users', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(this.newUser)
+            });
+            const data = await res.json();
+            this.message = data.message || data.error;
+            this.fetchUsers();
+          } catch (err) {
+            this.message = 'Error adding user';
+          }
+        },
+        async updateUser() {
+          try {
+            const res = await fetch(`http://localhost:3000/users/${this.editIndex}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(this.editUser)
+            });
+            const data = await res.json();
+            this.message = data.message || data.error;
+            this.fetchUsers();
+          } catch (err) {
+            this.message = 'Error updating user';
+          }
+        },
+        async deleteUser() {
+          try {
+            const res = await fetch(`http://localhost:3000/users/${this.deleteIndex}`, {
+              method: 'DELETE'
+            });
+            const data = await res.json();
+            this.message = data.message || data.error;
+            this.fetchUsers();
+          } catch (err) {
+            this.message = 'Error deleting user';
+          }
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
