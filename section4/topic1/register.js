@@ -1,9 +1,3 @@
-const express = require('express')
-const app = express()
-const port = 3000
-
-
-
 app.post('/register', (req, res) => {
   const { username, age } = req.body;
 
@@ -30,4 +24,6 @@ app.post('/register', (req, res) => {
   // All validations passed
   res.status(201).json({ message: 'User registered successfully!', user: { username, age } });
 });
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+
+
+
