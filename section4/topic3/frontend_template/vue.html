@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Test Express POST with Vue</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+      max-width: 500px;
+    }
+    input, button {
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .response {
+      margin-top: 1rem;
+      padding: 1rem;
+      border: 1px solid #ccc;
+      background-color: #f9f9f9;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h2>Send POST Request to Server</h2>
+    <label for="nameInput">Enter Name:</label>
+    <input
+      id="nameInput"
+      type="text"
+      v-model="name"
+      placeholder="Type your name here"
+    />
+    <button @click="sendPostRequest">Send</button>
+
+    <div v-if="responseMessage" class="response">
+      <strong>Response:</strong>
+      <div>{{ responseMessage }}</div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          name: '',
+          responseMessage: ''
+        };
+      },
+      methods: {
+        async sendPostRequest() {
+          this.responseMessage = 'Sending request...';
+
+          try {
+            const res = await fetch('http://localhost:3000/greet', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: this.name.trim() }),
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+              this.responseMessage = `Error: ${data.message || JSON.stringify(data)}`;
+            } else {
+              this.responseMessage = JSON.stringify(data, null, 2);
+            }
+          } catch (error) {
+            this.responseMessage = `Request failed: ${error.message}`;
+          }
+        },
+      },
+    }).mount('#app');
+  </script>
+</body>
+</html>
